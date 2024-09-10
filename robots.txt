@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /private/
+Disallow: /README.md
+Disallow: /LICENSE.txt
+
+# Disallow sensitive files
+Disallow: /README.md
+Disallow: /LICENSE.txt
+
+# Sitemap location
+Sitemap: https://sgdtomyr.live/sitemap.xml
