@@ -1,0 +1,37 @@
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.live-indicator {
+    animation: pulse 2s infinite;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    background-color: #10B981;
+    color: white;
+    margin-left: 8px;
+}
+
+.compact-table {
+    font-size: 0.9rem;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.compact-table th,
+.compact-table td {
+    padding: 0.5rem 1rem;
+    text-align: center;
+}
+
+.compact-table th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+}
+
+.compact-table tr:nth-child(even) {
+    background-color: #f9fafb;
+}

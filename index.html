@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGD to MYR Rate | Live and Historical Exchange Rates</title>
+    <meta name="description" content="Convert Singapore Dollars (SGD) to Malaysian Ringgit (MYR) with our real-time currency converter. View historical rates for the past 14 days.">
+    <meta name="keywords" content="SGD to MYR, currency converter, exchange rates, historical rates, Singapore Dollars, Malaysian Ringgit">
+    <meta name="author" content="SGD to MYR Currency Converter">
+    <meta property="og:title" content="SGD to MYR Rate | Live and Historical Exchange Rates">
+    <meta property="og:description" content="Convert Singapore Dollars (SGD) to Malaysian Ringgit (MYR) with our real-time currency converter. View historical rates for the past 14 days.">
+    <meta property="og:image" content="https://www.sgdtomyr.live/sgdtomyr_org.png">
+    <meta property="og:url" content="https://www.sgdtomyr.live/sgd-to-myr-converter">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SGD to MYR Rate | Live and Historical Exchange Rates">
+    <meta name="twitter:description" content="Convert Singapore Dollars (SGD) to Malaysian Ringgit (MYR) with our real-time currency converter. View historical rates for the past 14 days.">
+    <meta name="twitter:image" content="https://www.sgdtomyr.live/sgdtomyr-twitter.png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "SGD to MYR Converter",
+        "url": "https://www.sgdtomyr.live",
+        "description": "Convert Singapore Dollars (SGD) to Malaysian Ringgit (MYR) with our real-time currency converter. View historical rates for the past 14 days."
+    }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div id="app" class="min-h-screen flex flex-col">
+        <header class="bg-indigo-600 text-white py-6">
+            <div class="container mx-auto px-4">
+                <h1 class="text-3xl font-bold mb-4">SGD to MYR Live Rates</h1>
+                <nav class="space-x-4">
+                    <a href="#converter" class="hover:text-indigo-200 transition">SGD to MYR Converter</a>
+                    <a href="#historical-rates" class="hover:text-indigo-200 transition">Historical Rates</a>
+                    <a href="#faq" class="hover:text-indigo-200 transition">FAQ</a>
+                    <a href="#about" class="hover:text-indigo-200 transition">About</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-4 py-8 flex-grow">
+            <section id="converter" class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Real-time Exchange Rate SGD To MYR</h2>
+                <div v-if="usingFallbackRate" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+                    Note: We're currently using an estimated exchange rate. The actual rate may vary.
+                </div>
+                <p class="mb-4 flex items-center">
+                    Current exchange rate: 1 SGD = {{ exchangeRate }} MYR
+                    <span v-if="!usingFallbackRate" class="live-indicator">LIVE</span>
+                </p>
+                <form @submit.prevent="convertCurrency" class="mb-4">
+                    <div class="flex space-x-4">
+                        <input type="number" v-model="sgdAmount" placeholder="Enter SGD amount" required
+                               class="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">Convert</button>
+                    </div>
+                </form>
+                <p v-if="myrAmount" class="text-lg font-medium">{{ sgdAmount }} SGD = {{ myrAmount }} MYR</p>
+                <script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@type": "CurrencyConversionService",
+                    "name": "SGD to MYR Converter",
+                    "description": "Real-time SGD to MYR conversion service",
+                    "url": "https://www.sgdtomyr.live/sgd-to-myr-converter#converter",
+                    "currenciesAccepted": ["SGD", "MYR"],
+                    "availableLanguage": "en"
+                }
+                </script>
+            </section>
+
+            <section id="historical-rates" class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Historical SGD to MYR Exchange Rates (Last 14 Days)</h2>
+                <div v-if="loadingHistoricalRates" class="text-center py-4">
+                    Loading historical rates...
+                </div>
+                <div v-else-if="historicalRatesError" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+                    {{ historicalRatesError }}
+                </div>
+                <div v-else>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="compact-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>SGD to MYR Rate</th>
+                                    <th>Date</th>
+                                    <th>SGD to MYR Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="i in 7" :key="i">
+                                    <td>{{ formatDate(sortedRates[i - 1].date) }}</td>
+                                    <td>{{ sortedRates[i - 1].rate.toFixed(4) }}</td>
+                                    <td>{{ formatDate(sortedRates[i + 6].date) }}</td>
+                                    <td>{{ sortedRates[i + 6].rate.toFixed(4) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@type": "DataFeed",
+                    "name": "Historical SGD to MYR Rates",
+                    "description": "Historical exchange rates for SGD to MYR over the past 14 days",
+                    "url": "https://www.sgdtomyr.live/sgd-to-myr-converter#historical-rates",
+                    "dateModified": "{{ new Date().toISOString() }}",
+                    "itemListElement": [
+                        {
+                            "@type": "DataFeedItem",
+                            "dateModified": "{{ sortedRates[0].date }}",
+                            "item": {
+                                "@type": "ExchangeRateSpecification",
+                                "currency": "SGD",
+                                "exchangeRate": "{{ sortedRates[0].rate }}"
+                            }
+                        },
+                        {
+                            "@type": "DataFeedItem",
+                            "dateModified": "{{ sortedRates[1].date }}",
+                            "item": {
+                                "@type": "ExchangeRateSpecification",
+                                "currency": "SGD",
+                                "exchangeRate": "{{ sortedRates[1].rate }}"
+                            }
+                        }
+                        // Add more items as needed
+                    ]
+                }
+                </script>
+            </section>
+
+            <section id="historical-chart" class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4">SGD to MYR Rate Trend (Last 14 Days)</h2>
+                <div class="w-full" style="height: 400px;">
+                    <canvas id="historicalChart"></canvas>
+                </div>
+            </section>
+
+            <section id="faq" class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Frequently Asked Questions</h2>
+                <div class="space-y-4">
+                    <div v-for="(item, index) in faqItems" :key="index" class="border-b border-gray-200 pb-4">
+                        <button @click="toggleFAQ(index)" class="flex justify-between items-center w-full text-left font-medium">
+                            <span>{{ item.question }}</span>
+                            <span class="transform transition-transform" :class="{ 'rotate-180': item.isOpen }">&#9660;</span>
+                        </button>
+                        <p v-show="item.isOpen" class="mt-2 text-gray-600">{{ item.answer }}</p>
+                    </div>
+                </div>
+                <script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    "mainEntity": [
+                        {
+                            "@type": "Question",
+                            "name": "How often are the exchange rates updated?",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "Our live exchange rates are updated every minute to ensure you have the most current information."
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": "Where do you source your exchange rates?",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "We use reputable currency exchange APIs to fetch our rates, ensuring accuracy and reliability."
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": "Why do I see a 'fallback rate' message sometimes?",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "If we're unable to fetch the latest rates from our primary source, we use a fallback rate to ensure the converter remains functional. This rate may not be as current as our real-time rates."
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": "How far back does the historical data go?",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "Our historical data shows the SGD to MYR exchange rates for the past 14 days."
+                            }
+                        }
+                    ]
+                }
+                </script>
+            </section>
+
+            <section id="about" class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4">About SGD to MYR Converter</h2>
+                <p class="mb-4">
+                    Our SGD to MYR Converter provides real-time exchange rates for converting Singapore Dollars (SGD) to Malaysian Ringgit (MYR). We strive to offer the most up-to-date and accurate conversion rates to help you make informed decisions about your currency exchanges.
+                </p>
+                <p class="mb-4">
+                    Features of our service include:
+                </p>
+                <ul class="list-disc list-inside mb-4">
+                    <li>Free Live exchange rates updated every minute</li>
+                    <li>Historical rates for the past 14 days</li>
+                    <li>Historical Trend Charts for SGD to MYR rates</li>
+                    <li>User-friendly interface for quick conversions</li>
+                    <li>Reliable fallback rates from CIMB, DBS or Maybank in case of API disruptions</li>
+                </ul>
+                <p>
+                    Whether you're planning a trip to Malaysia, sending money to family, or conducting business transactions, our converter is here to assist you with accurate and timely information.
+                </p>
+            </section>
+
+            <section id="local-banks" class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Currency Exchange at Local Singapore Banks</h2>
+                <p class="mb-4">
+                    Several local banks in Singapore offer currency exchange services for SGD to MYR. Here's a brief overview of some major banks and their services:
+                </p>
+                <div class="space-y-4">
+                    <div v-for="(bank, index) in localBanks" :key="index" class="border-b border-gray-200 pb-4">
+                        <h3 class="text-lg font-medium mb-2">
+                            <a :href="bank.link" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
+                                {{ bank.name }}
+                            </a>
+                        </h3>
+                        <p class="mb-2">{{ bank.description }}</p>
+                        <ul class="list-disc list-inside">
+                            <li v-for="(point, pointIndex) in bank.points" :key="pointIndex">{{ point }}</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="mt-4">
+                    Remember to compare rates and fees across different banks and money changers to get the best deal. Rates may vary depending on the amount you're exchanging and market conditions.
+                </p>
+            </section>
+        </main>
+
+        <footer class="bg-gray-800 text-white py-4 mt-8">
+            <div class="container mx-auto px-4 text-center">
+                <p>&copy; 2024 SGD to MYR Rate Converter. All rights reserved.</p>
+                <nav class="mt-4 space-x-4">
+                    <a href="privacy-policy.html" class="text-white hover:text-indigo-200 transition">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="text-white hover:text-indigo-200 transition">Terms of Service</a>
+                </nav>
+            </div>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
